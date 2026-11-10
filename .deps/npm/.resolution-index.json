@@ -1,0 +1,37 @@
+{
+  "01_Storage.sol": {
+    "__sources__": {
+      "01_Storage.sol": {
+        "content": "// SPDX-License-Identifier: MIT\r\npragma solidity ^0.8.0;\r\n\r\ncontract Storage {\r\n    uint256 private storedData; // Biến trạng thái lưu trữ\r\n\r\n    // Khai báo sự kiện theo yêu cầu đề bài\r\n    event ValueSet(address indexed who, uint256 newValue);\r\n\r\n    // Hàm khởi tạo giá trị ban đầu khi deploy\r\n    constructor (uint256 _init) { \r\n        storedData = _init;\r\n    }\r\n\r\n    // Hàm cập nhật giá trị và phát ra sự kiện\r\n    function set (uint256 _value) public {\r\n        storedData = _value;\r\n        emit ValueSet(msg.sender, _value);\r\n    }\r\n\r\n    // Hàm đọc giá trị (view function không tốn gas)\r\n    function get() public view returns (uint256) {\r\n        return storedData;\r\n    }\r\n}",
+        "file": "01_Storage.sol"
+      }
+    }
+  },
+  "picture/01_ganache.sol": {
+    "__sources__": {}
+  },
+  "02_Greeting.sol": {
+    "__sources__": {
+      "02_Greeting.sol": {
+        "content": "// SPDX-License-Identifier: MIT\r\npragma solidity ^0.8.0;\r\n\r\ncontract Greeting {\r\n    string private greeting;\r\n    address public owner;\r\n\r\n    // Khai báo sự kiện theo yêu cầu đề bài\r\n    event GreetingChanged(address indexed changer, string newGreeting);\r\n\r\n    // Modifier giới hạn chỉ có owner mới được gọi hàm\r\n    modifier onlyOwner() {\r\n        require(msg.sender == owner, \"Not the owner\");\r\n        _;\r\n    }\r\n\r\n    // Constructor: gán người deploy là owner và thiết lập lời chào mặc định ban đầu\r\n    constructor(string memory _g) {\r\n        owner = msg.sender;\r\n        greeting = _g;\r\n    }\r\n\r\n    // Hàm thay đổi lời chào (chỉ owner mới gọi được)\r\n    function setGreeting(string memory _g) public onlyOwner {\r\n        greeting = _g;\r\n        emit GreetingChanged(msg.sender, _g);\r\n    }\r\n\r\n    // Hàm đọc lời chào (bất kỳ ai cũng gọi được, là hàm view không tốn gas)\r\n    function greet() public view returns (string memory) {\r\n        return greeting;\r\n    }\r\n\r\n    // Hàm đưa lời chào về mặc định 'Hello, World!' (chỉ owner mới gọi được)\r\n    function resetGreeting() public onlyOwner {\r\n        greeting = 'Hello, World!';\r\n        emit GreetingChanged(msg.sender, 'Hello, World!');\r\n    }\r\n}",
+        "file": "02_Greeting.sol"
+      }
+    }
+  },
+  "03_Counter.sol": {
+    "__sources__": {
+      "03_Counter.sol": {
+        "content": "// SPDX-License-Identifier: MIT\r\npragma solidity ^0.8.0;\r\n\r\ncontract Counter {\r\n    uint256 public count;\r\n    uint256 public constant MAX = 100;\r\n\r\n    // Khai báo các sự kiện theo yêu cầu đề bài\r\n    event Incremented(address indexed user, uint256 newCount);\r\n    event Decremented(address indexed user, uint256 newCount);\r\n    event Reset(address indexed user);\r\n\r\n    // Hàm tăng giá trị (giới hạn tối đa là 100)\r\n    function increment() public {\r\n        require(count < MAX, \"Max limit reached at 100\");\r\n        count++;\r\n        emit Incremented(msg.sender, count);\r\n    }\r\n\r\n    // Hàm giảm giá trị (không được nhỏ hơn 0)\r\n    function decrement() public {\r\n        require(count > 0, \"Count is zero\");\r\n        count--;\r\n        emit Decremented(msg.sender, count);\r\n    }\r\n\r\n    // Hàm đặt lại bộ đếm về 0 (chỉ thực hiện qua lời gọi tường minh)\r\n    function reset() public {\r\n        count = 0;\r\n        emit Reset(msg.sender);\r\n    }\r\n}",
+        "file": "03_Counter.sol"
+      }
+    }
+  },
+  "04_Ownable.sol": {
+    "__sources__": {
+      "04_Ownable.sol": {
+        "content": "// SPDX-License-Identifier: MIT\r\npragma solidity ^0.8.0;\r\n\r\ncontract Ownable {\r\n    address public owner;\r\n\r\n    event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);\r\n\r\n    constructor() {\r\n        owner = msg.sender;\r\n    }\r\n\r\n    modifier onlyOwner() {\r\n        require(msg.sender == owner, \"Not the owner\");\r\n        _;\r\n    }\r\n\r\n    function transferOwnership(address newOwner) public onlyOwner {\r\n        require(newOwner != address(0), \"Invalid new owner\");\r\n        emit OwnershipTransferred(owner, newOwner);\r\n        owner = newOwner;\r\n    }\r\n}\r\n\r\ncontract ProtectedVault is Ownable {\r\n    // Kế thừa Ownable, quản lý tiền gửi và rút ETH an toàn\r\n    function deposit() public payable {\r\n        require(msg.value > 0, \"Must send ETH\");\r\n    }\r\n\r\n    function withdraw(address payable to, uint256 amt) public onlyOwner {\r\n        require(amt <= address(this).balance, \"Insufficient balance\");\r\n        (bool success, ) = to.call{value: amt}(\"\");\r\n        require(success, \"Transfer failed\");\r\n    }\r\n\r\n    function contractBalance() public view returns (uint256) {\r\n        return address(this).balance;\r\n    }\r\n}",
+        "file": "04_Ownable.sol"
+      }
+    }
+  }
+}
